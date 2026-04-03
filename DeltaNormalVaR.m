@@ -50,6 +50,6 @@ losses = -portfolioDelta * DeltaS;
 
 %% 4. Delta‑Normal VaR via Historical Simulation
 % We extract the alpha-quantile from the empirical loss distribution
-VaR = quantile(losses, alpha);
+VaR = quantile(losses, alpha) * sqrt(riskMeasureTimeIntervalInDays);
 
 end
