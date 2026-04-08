@@ -79,6 +79,6 @@ end
 
 returnsSelected = log(valuesSelectedShares(2:end,:) ./ valuesSelectedShares(1:end-1,:));
 tSelected = tSelected(2:end);
-pricesAligned = valuesSelectedShares(1:end-1, :);
+pricesAligned = valuesSelectedShares(1:end, :);
 
 end % returnsOfInterest
