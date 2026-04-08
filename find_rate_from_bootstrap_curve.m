@@ -1,7 +1,7 @@
-function [disc_fact,rate] = find_rate_from_bootstrap_curve(refDate,maturity)
+function [disc_fact, rate] = find_rate_from_bootstrap_curve(refDate, maturity)
     % FIND_RATE_FROM_BOOTSTRAP_CURVE
-    % Computes the interpolated discount factor associated with a given 
-    % maturity, using a bootstrapped yield curve.
+    % Computes the interpolated discount factor and zero rate associated 
+    % with a given maturity, using a bootstrapped yield curve.
     %
     % INPUT:
     %   refDate   = valuation date
@@ -11,34 +11,31 @@ function [disc_fact,rate] = find_rate_from_bootstrap_curve(refDate,maturity)
     %   disc_fact = discount factor corresponding to the requested maturity
     %   rate      = zero rate corresponding to the requested maturity
    
-    
     % Settings
     formatData = 'dd/mm/yyyy';   % Date format 
-
+    
     % Read market data (dates and quoted market rates) from Excel
     [datesSet, ratesSet] = readExcelData('MktData_CurveBootstrap.xls', formatData);
-
-    % Bootstrap the yield curve to obtain discount factors
-    % 'dates'     = vector of maturities used in the curve
-    % 'discounts' = corresponding discount factors obtained via bootstrap
-    [dates, discounts, ~] = bootstrap(datesSet, ratesSet);
     
-    % We compute the settlement date (current date + 2 (adjusted to a
-    % business day))
-    settlement_date = business_date_offset(refDate,day_offset = 2);
-   
-    % We adjust the matury to a business day
+    % Bootstrap the yield curve to obtain zero rates directly
+    % 'dates'     = vector of maturities used in the curve
+    % 'discounts' = corresponding discount factors
+    % 'zeroRates' = corresponding continuously compounded zero rates
+    [dates, discounts, zeroRates] = bootstrap(datesSet, ratesSet);
+    
+    % We adjust the maturity to a business day
     maturity = business_date_offset(maturity);
     
-    % We find the discount factor corresponding to the adjusted maturity
-    disc_fact = get_discount_factor_by_zero_rates_linear_interp( settlement_date, ...   
-                maturity, dates, discounts);  
-
-    % We compute year fraction from reference_date to maturiity with
-    % ACT/365 convention
-    year_frac = yearfrac(settlement_date, maturity, 3);
-
-    % We convert discount factor to continuously compounded zero rate
-    rate = -log(disc_fact)/ year_frac;
-
+    % We interpolate directly on the continuously compounded zero rates
+    % (Interpolating zero rates instead of discount factors is the standard 
+    % financial practice to avoid forward rate instability)
+    rate = interp1(dates, zeroRates, maturity, 'linear', 'extrap');
+    
+    % We compute the year fraction from the start date of the bootstrap curve 
+    % to the adjusted maturity (ACT/365 convention)
+    year_frac_from_curve_start = yearfrac(dates(1), maturity, 3);
+    
+    % We compute the clean discount factor using the interpolated rate
+    disc_fact = exp(-rate * year_frac_from_curve_start);
+    
 end

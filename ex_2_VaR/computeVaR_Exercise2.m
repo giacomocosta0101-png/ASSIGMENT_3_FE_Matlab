@@ -30,7 +30,7 @@ function [VaR_FMC, VaR_DN] = computeVaR_Exercise2(stockNotional, strike, expiryD
 
 %% 1. Retrieve the zero‑coupon rate from the bootstrap curve
 [~,rate] = find_rate_from_bootstrap_curve(refDate,expiryDate);
-
+rate
 
 %% 2. Load 2‑year historical returns and aligned prices for Generali
 [~, returnsSelected, pricesAligned] = returnsOfInterest( ...

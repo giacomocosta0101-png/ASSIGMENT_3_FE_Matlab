@@ -40,8 +40,8 @@ ws = w(idx);
 cumw = cumsum(ws);
 
 % Find the VaR quantile: VaR is the smallest loss such that cumulative 
-% weight ≥ (1 - alpha)
-k = find(cumw >= (1 - alpha), 1);
+% weight <= (1 - alpha)
+k = find(cumw <= (1 - alpha), 1,'last');
 VaR = Ls(k);
 
 % Compute Weighted ES

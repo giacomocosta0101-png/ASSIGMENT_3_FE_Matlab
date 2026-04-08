@@ -20,7 +20,6 @@ riskMeasureTimeIntervalInDays = 1;        % 1‑day time horizon
 numberAssets = size(sharesList,1);        % Number of assets in the ptf
 weights = (1/numberAssets) * ones(numberAssets,1);  % Equally‑weighted ptf
 
-
 [~, returnsSelected, ~] = returnsOfInterest(inputFile, refDate, ...
         timeWindow, sharesList, formatDate);
 

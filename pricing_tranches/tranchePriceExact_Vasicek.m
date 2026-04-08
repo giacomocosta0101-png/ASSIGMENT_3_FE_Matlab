@@ -38,9 +38,8 @@ function price = tranchePriceExact_Vasicek(I, p, rho, LGD, Kd, Ku)
 %   where φ(y) is the standard normal density.
 %
 
-
     % Threshold K such that P(v_i <= K) = p
-     K = norminv(p);
+    K = norminv(p);
 
     % Conditional default probability p(y)
     p_y = @(y) normcdf( (K - sqrt(rho).*y) ./ sqrt(1 - rho) );
