@@ -9,7 +9,7 @@ addpath('pricing_tranches','ex_2_VaR')
 inputFile = 'sx5e_historical_data.xls'; % File name containing historical price data
 formatDate = 'dd/mm/yyyy';              % Date format
 NumberOfYears = 2;                      % Length of the historical window
-timeWindow = -NumberOfYears * 12;       % = -24 (indietro di 2 anni)    % Convert years into months
+timeWindow = -NumberOfYears * 12;       % Convert years into months
 
 %% Exercise 0
 refDate = datenum('24-Jul-2012');         % Current date 
@@ -20,10 +20,8 @@ riskMeasureTimeIntervalInDays = 1;        % 1‑day time horizon
 numberAssets = size(sharesList,1);        % Number of assets in the ptf
 weights = (1/numberAssets) * ones(numberAssets,1);  % Equally‑weighted ptf
 
-
 [~, returnsSelected, ~] = returnsOfInterest(inputFile, refDate, ...
         timeWindow, sharesList, formatDate);
-
 try  % We compute VaR & ES under the Gaussian approach
     [ES, VaR] = AnalyticNormalMeasures(alpha, weights, portfolioValue, ...
         riskMeasureTimeIntervalInDays, returnsSelected); 
@@ -73,7 +71,6 @@ weights = ones(N,1) / N;               % Equally weighted portfolio
 % Plausibility Check 
 VaR_PC_2 = PlausibilityCheckVaR(alpha, weights, portfolioValue, ...
             riskMeasureTimeIntervalInDays, returnsSelected);
-
 %% Exercise 1.c 
 alpha = 0.99;                          % Confidence level for VaR and ES
 riskMeasureTimeIntervalInDays = 10;    % 10‑day time horizon
@@ -82,7 +79,6 @@ sharesList = {'AirLiquide' ; 'Allianz' ; 'InBev' ; 'Arcelor' ; 'ASML' ; ...
     'Generali' ; 'AXA' ; 'BBVA' ; 'Santander' ; 'BASF' ; 'Bayer' ; 'BMW' ; ...
     'BNP' ; 'Carrefour' ; 'StGobain' ; 'CRH' ; 'Daimler' ; 'Danone' ; 'DB' ;...
     'DT' ; 'EON' ; 'ENEL' ; 'ENI' ; 'Essilor' ; 'FT'}; % Portfolio composition
-
 nAssets = size(sharesList,1);          % Number of assets in the ptf
 weights = (1/nAssets) * ones(nAssets, 1); % Equally weighted portfolio
 [~, returnsSelected, ~] = returnsOfInterest(inputFile, refDate, ...
