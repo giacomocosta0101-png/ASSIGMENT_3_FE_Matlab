@@ -22,7 +22,9 @@ function [disc_fact,rate] = find_rate_from_bootstrap_curve(refDate,maturity)
     % 'dates'     = vector of maturities used in the curve
     % 'discounts' = corresponding discount factors obtained via bootstrap
     [dates, discounts, ~] = bootstrap(datesSet, ratesSet);
+    
     base_date = dates(1);
+    
     % We compute the settlement date (current date + 2 (adjusted to a
     % business day))
     settlement_date = business_date_offset(refDate,day_offset = 2);

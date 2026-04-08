@@ -23,13 +23,6 @@ T = length(L);
 C = (1 - lambda) / (1 - lambda^T);
 w = C * lambda.^((T-1):-1:0)'; 
 
-
-
-% Normalize weights so that sum(w) = 1
-%w = w / sum(w); c'è già C che fa questa cosa
-
-
-
 % Sort losses from worst to best
 [Ls, idx] = sort(L, 'descend');
 
@@ -40,7 +33,7 @@ ws = w(idx);
 cumw = cumsum(ws);
 
 % Find the VaR quantile: VaR is the largest loss such that cumulative 
-% weight ≥ (1 - alpha)
+% weight <= (1 - alpha)
 k = find(cumw <= (1 - alpha), 1,'last');
 VaR = Ls(k);
 

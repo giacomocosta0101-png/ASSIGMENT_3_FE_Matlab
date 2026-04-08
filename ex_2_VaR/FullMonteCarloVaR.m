@@ -42,8 +42,8 @@ S_next = currentPrice * exp(returns);
 %% 3. Compute option price at t + Δ for each simulated S_next
 % we compute the new time‑to‑maturity which decreases by Δ = 1 day. Since we 
 % want an yearly quantity, we divide the daily riskMeasureTimeIntervalInDays
-% by 252 (number of trading day in one year)
-TTM_next = TTM_in_years - riskMeasureTimeIntervalInDays/365; % più coerente con ACT/365
+% by 365 
+TTM_next = TTM_in_years - riskMeasureTimeIntervalInDays/365; 
 
 % Reprice the put for each simulated underlying
 [~, putTomorrow]  = blsprice(S_next, strike, rate, TTM_next,volatility, dividendYield);

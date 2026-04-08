@@ -42,12 +42,11 @@ portfolioDelta = numberOfShares + numberOfPuts * putDelta;
 % First‑order approximation:
 %       X_t = ΔS_t ≈ S_t * r_t
 
-X = stockPrice * returns; %I think we should do: stockPrice*exp(returns)?
+X = stockPrice * returns;
 
 %% 3. Compute the standard deviation of X_t over the VaR horizon
 % Daily standard deviation of the risk‑factor variations
 sigma_X_daily = std(X); 
-% Bisogna usare questa o la volatility data? sigma_X_daily = stockPrice * (volatility / sqrt(252));
 
 % Time scaling 
 sigma_X_horizon = sigma_X_daily * sqrt(riskMeasureTimeIntervalInDays);
@@ -77,11 +76,6 @@ sigma_L = abs(portfolioDelta) * sigma_X_horizon;
 z = norminv(alpha);
 
 % Final Delta‑Normal VaR
-VaR = mu_L + z * sigma_L; % i've already compute mu_L as -portfolioDalta*mu_X 
-
-%% 5. What I would do:
-
-
-
+VaR = mu_L + z * sigma_L;
 
 end

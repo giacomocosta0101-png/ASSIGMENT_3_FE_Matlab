@@ -37,11 +37,11 @@ function [VaR_FMC, VaR_DN] = computeVaR_Exercise2(stockNotional, strike, expiryD
     inputFile, refDate, timeWindow, sharesList, formatDate);
 
 %% 3. Current stock price (last aligned price)
-currentPrice = pricesAligned(end)
+currentPrice = pricesAligned(end);
 
 %% 4. Number of shares and number of puts
 % The investor holds stockNotional worth of Generali shares
-numberOfShares = stockNotional / currentPrice
+numberOfShares = stockNotional / currentPrice;
 
 % The same number of put options is held
 numberOfPuts = numberOfShares;
