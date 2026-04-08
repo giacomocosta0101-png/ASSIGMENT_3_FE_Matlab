@@ -1,84 +1,67 @@
 function [tSelected, returnsSelected, pricesAligned] = returnsOfInterest(inputFile, refDate, timeWindow, sharesList, formatDate)
-if(nargin < 5)
-    formatDate = 'dd/mm/yyyy';
+% Selects set of dates and returns in a lag of interest
+% [tSel returnsSel] = returnsOfInterest(inputFile, refDate, timeWindow, sharesList)
+%
+% INPUTS:
+% - inputFile:  complete excel file name (with path) 
+% - refDate:    first date of interest
+% - timeWindow: in months
+% - sharesList: list of the N Shares of Interest
+% - formatDate: format used for dates (default 'mm/dd/yyyy')
+% 
+% OUTPUTS:
+% - tSelected:  vector with the T dates of interest 
+% - returnsSel: matrix with TxN returns values
+% - pricesAligned: T×N matrix of aligned prices 
+%
+% USES:
+% - findSeries: given the set of data selects the asset of interest
+% - dateAddMonth: adds to a month a given number of months
+% - closestDate: selects the nearest (even the previous one) to a given date
+% - underlyingCode: Converts share name in bbg code 
+
+if(nargin <5)
+    formatDate = 'mm/dd/yyyy';
 end
 
-elementsBasket = size(sharesList, 1);
+elementsBasket = size(sharesList,1);
 
-% ===== READ DATA (cross-platform) =====
-raw = readcell(inputFile, 'Sheet', 'Data', 'Range', 'A5:CX1295');
-[nRows, nCols] = size(raw);
+% Load historical data
+[shareData.num,shareData.cell]=xlsread(inputFile,'Data','a5:cx1295');
 
-% Build header map: odd columns have asset names
-headers = cell(1, nCols);
-for c = 1:nCols
-    if ischar(raw{1,c}) || isstring(raw{1,c})
-        headers{c} = strtrim(char(raw{1,c}));
-    else
-        headers{c} = '';
-    end
-end
+% Select the set of dates of interest: the ones in Eurostoxx50
+[~, t_index]=findSeries(shareData,'SX5E Index', formatDate);
 
-% ===== HELPER: find asset column index (odd col with name match) =====
-    function col = findCol(name)
-        col = [];
-        for cc = 1:2:nCols
-            if ~isempty(strfind(headers{cc}, name))
-                col = cc;
-                return;
-            end
-        end
-        error('Asset "%s" non trovato nel file.', name);
-    end
-
-% ===== HELPER: extract dates and prices for a given asset =====
-    function [dates, prices] = extractSeries(col)
-        dateCol = col;      % odd column = dates (datetime)
-        priceCol = col + 1; % even column = prices (double)
-        % Find valid rows (price is numeric and non-NaN)
-        mask = false(nRows-1, 1);
-        vals = NaN(nRows-1, 1);
-        dts  = NaT(nRows-1, 1);
-        for rr = 2:nRows
-            v = raw{rr, priceCol};
-            d = raw{rr, dateCol};
-            if isnumeric(v) && ~isnan(v) && isdatetime(d)
-                mask(rr-1) = true;
-                vals(rr-1) = v;
-                dts(rr-1)  = d;
-            end
-        end
-        prices = vals(mask);
-        dates  = datenum(dts(mask));
-    end
-
-% ===== GET INDEX DATES (SX5E) =====
-idxCol = findCol('SX5E Index');
-[t_index, ~] = extractSeries(idxCol);
-
-% ===== SELECT DATE WINDOW =====
-refDate = datenum(refDate);
+% refDate, endDate
+refDate=datenum(refDate); 
 [refDate, idxStart] = closestDate(refDate, t_index);
 endDate = dateAddMonth(refDate, timeWindow);
 [~, idxEnd] = closestDate(endDate, t_index);
-% Assicura che idxStart < idxEnd
-if idxStart > idxEnd
-    [idxStart, idxEnd] = deal(idxEnd, idxStart);
-end
-tSelected = t_index(idxStart:idxEnd);
 
-% ===== GET SHARE PRICES =====
-valuesSelectedShares = zeros(idxEnd - idxStart + 1, elementsBasket);
+idx1 = min(idxStart, idxEnd);
+idx2 = max(idxStart, idxEnd);
+tSelected = t_index(idx1:idx2);
+
+% Prices of the selected shares
+% If the value is not present I take the value from the previous date 
+valuesSelectedShares = zeros(length(tSelected), elementsBasket);
+
 for i = 1:elementsBasket
     bbgCode = underlyingCode(sharesList(i,:));
-    col_i = findCol(bbgCode);
-    [t_share, prices_share] = extractSeries(col_i);
+    [values_share, t_share] = findSeries(shareData, bbgCode, formatDate);
+    
+    % For each underlying in the pft I check that it is present 
+    % in the time-interval of interest otherwise I take previous business day
+    
+    % For every date in the share series, we find the closest date 
     [~, idxShare] = arrayfun(@(d) closestDate(d, t_share), tSelected);
-    valuesSelectedShares(:, i) = prices_share(idxShare);
+
+    % Store the aligned prices in the output matrix.
+    valuesSelectedShares(:,i) = values_share(idxShare);
 end
 
-returnsSelected = log(valuesSelectedShares(2:end,:) ./ valuesSelectedShares(1:end-1,:));
+returnsSelected=log(valuesSelectedShares(2:end,:)./valuesSelectedShares(1:end-1,:));
 tSelected = tSelected(2:end);
 pricesAligned = valuesSelectedShares(1:end, :);
 
-end % returnsOfInterest
+end %returnsOfInterest

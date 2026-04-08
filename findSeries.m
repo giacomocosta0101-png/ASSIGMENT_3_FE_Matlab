@@ -48,5 +48,4 @@ if strcmp(CompleteName,'')
     error(['Titolo "' assetName '" non trovato; provare a scrivere solo parte del nome']);
 end
  
-end % findSeries 
-                                          
+end % findSeries                        
